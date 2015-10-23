@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Project</title>
+    <style type="text/css">
+        canvas {
+        border: 1px solid grey; 
+        }
+    </style>
+  </head>
+    
+  <body>
+    
+    <canvas id="canvas" width="600" height="400"></canvas>
+    
+    <script type="text/javascript">
+        
+      // Gets a handle to the element with id canvasOne.
+      var canvas = document.getElementById("canvas");
+      // Get a 2D context for the canvas.
+      var ctx = canvas.getContext("2d");
+     
+      //square------------------------------------------------------------------------
+      var square = {
+         x: 50,
+         y: 50,
+         vx: 1,
+         vy: 1,
+           
+         draw: function(){
+            ctx.fillStyle = "rgb(255,0,0)";
+            ctx.fillRect(this.x, this.y, 25,25);
+             ctx.fill();
+          }
+       };
+       
+       //initialyze---------------------------------------------------------------------
+	   function init(){
+           
+          square.draw();   
+       }
+       init();
+       
+    </script>
+      
+  </body>
+</html>
