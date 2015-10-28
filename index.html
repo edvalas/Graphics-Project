@@ -5,7 +5,7 @@
     <title>Project</title>
     <style type="text/css">
         canvas {
-        border: 1px solid grey; 
+			border: 1px solid grey;
         }
     </style>
   </head>
@@ -15,79 +15,170 @@
     <canvas id="canvas" width="600" height="400"></canvas>
     
     <script type="text/javascript">
-        
+      //http://stackoverflow.com/questions/21089959/detecting-collision-of-rectangle-with-circle-in-html5-canvas
       // Gets a handle to the element with id canvasOne. Ian
       var canvas = document.getElementById("canvas");
       // Get a 2D context for the canvas.
       var ctx = canvas.getContext("2d");
      
-      //square------------------------------------------------------------------------
+      //square-Player-----------------------------------------------------------------
       var square = {
          x: 285,
          y: 370,
-         vx: 0,
-         vy: 0,
+		 w: 30,
+		 h: 30,
            
          draw: function(){
             ctx.fillStyle = "rgb(255,0,0)";
-            ctx.fillRect(this.x, this.y, 30,30);
-             
-          }
+            ctx.fillRect(this.x, this.y, this.w, this.h);
+         },
+		 
+		 complete: function(){
+			if(this.x == 0 && this.y == 0){
+				console.log("complete!");
+				this.x = 285;
+				this.y = 370;
+				ctx.fillRect(this.x, this.y, this.w, this.h);
+			}
+		 }
        };
         
-       //KEYBOARD----------------------------------------------------------------------
-       // Add an event listener to the keypress event.
-       window.addEventListener("keypress", function(event) { 
+	  //rectangle at the top----------------------------------------------------------
+	  var rectangle = {
+		x: 0,
+		y: 0,
+		
+		//draw the rectangle across the top
+		draw: function (){
+			ctx.fillStyle = "rgb(0,150,0)";
+            ctx.fillRect(this.x, this.y, canvas.width, 30);
+		},
+		//create a gap of the same size as the player square in the rectangle at the top
+		createSlot: function(){
+			ctx.clearRect(0,0,30,30);
+		}
+	  }
+     
+	  //ball---------------------------------------------------------------------
+	  function Ball(xpos,ypos, vx, vy) {
+		this.x = xpos;
+		this.y = ypos;
+		this.r = 10;
+		this.vx = vx;
+		this.vy = vy;
+        
+        this.draw = function(){
+          ctx.fillStyle = "rgb(200,10,500)";
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.closePath();
+        };
+        
+        this.moveBall = function(){
+          if(this.x > canvas.width - this.r || this.x < this.r){
+              this.vx = -this.vx;
+          }
+
+          if(this.y > canvas.height - this.r || this.y < this.r){
+              this.vy = -this.vy;
+          }
+
+          // Update the y location.
+          this.x += this.vx;
+          this.y += this.vy;
+        };
+		
+		this.colliding = function(square){
+			var distX = Math.abs((this.x + this.vx) - (square.x));
+			var distY = Math.abs((this.y + this.vy) - (square.y));
+			
+		    if (distX > ((square.w/2) + this.r)){
+				return false;
+			}
+			if(distY > ((square.h/2) + this.r)){
+				return false;
+			}
+			if (distX <= this.r){
+				console.log("collision");
+				this.vx -= this.vx;
+				return true;
+			} 
+			if (distY <= this.r){
+				console.log("collision");
+				this.vy -= this.vy;
+				return true;
+			}
+		 };
+	  }
+	  
+	  var balls = [];
+	  
+	  //KEYBOARD----------------------------------------------------------------------
+      // Add an event listener to the keypress event.
+      window.addEventListener("keypress", function(event) { 
         // Just log the event to the console.
         console.log(event);
-          
-          
-        ctx.clearRect(0,0,canvas.width,canvas.height)
         
-        if(event.keyCode == 119)
-        {
-			square.vy -= 5;
-			
-			if(square.y + square.vy == 0){
-			  square.vy += 5;
-			}
+		//check that the player square cannot leave the canvas
+        if(event.keyCode == 119 && square.y > 0){//w key -------------------
+			square.y -= 5;
+        }
+        else if(event.keyCode == 115 && square.y + 30 < canvas.height){//s key -------------------
+			square.y += 5;
+        }
+        else if(event.keyCode == 97 && square.x > 0){//a key -------------------
+			square.x -= 5;
+        }
+        else if(event.keyCode == 100 && square.x + 30 < canvas.width){//d key -------------------
+            square.x += 5;
+        }
+      });
+  
+	  //game loop---------------------------------------------------------------------
+	  function step(t){
+        //console.log(t);
         
-        }
-        else if(event.keyCode == 115)
-        {
-			square.vy += 5;
-			  
-			if(square.y + square.vy >= canvas.height){
-				square.vy-=5;
-			}
-        }
-        else if(event.keyCode == 97)
-        {
-			square.vx -= 5;
-			
-			if(square.x + square.vx == 0){
-				square.vx += 5;
-			}
-        }
-        else if(event.keyCode == 100)
-        {
-            square.vx += 5;
-            
-            if(square.x + square.vx >= canvas.width){
-                square.vx -= 5;
-                
-            }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+		for (var i = 0; i < balls.length; i++){
+		  balls[i].draw();
+		  balls[i].moveBall();
+		  balls[i].colliding(square);
         }
 		
-        ctx.fillRect((square.x + square.vx), (square.y + square.vy), 30,30);
-      });
+		//draw the rectangle at the top and clear space for the square
+		rectangle.draw();
+		rectangle.createSlot();
+		
+		
+		square.complete();
+
+		//draw the player square
+		ctx.fillStyle = "rgb(255,0,0)";
+        ctx.fillRect((square.x), (square.y), square.w, square.h);	
+        
+        window.requestAnimationFrame(step);
+	  }
+	  
+      //initialyze--------------------------------------------------------------------
+	  function init(){
+     	 //draw the rectangle at the top create a slot and draw the player square
+		 rectangle.draw();
+		 rectangle.createSlot();
+         square.draw();
+		 
+		for(var i = 0; i < 5; i++){
+          balls[i] = new Ball((Math.random() * 300) + 1, (Math.random() * 300) + 1, (Math.random() * 2) + 1, (Math.random() * 3) + 1);
+        }
        
-       //initialyze--------------------------------------------------------------------
-	   function init(){
-           
-          square.draw();   
-       }
-       init();
+		for (var i = 0; i < balls.length; i++){
+          balls[i].draw();
+        }
+		
+		step();
+      }
+      init(); // call the init function
        
     </script>
       
