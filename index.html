@@ -21,6 +21,11 @@
       // Get a 2D context for the canvas.
       var ctx = canvas.getContext("2d");
      
+	  var gameLevel = 1;
+	  var randomX;
+	  var slotX;
+	  var stopLoop = false;
+	  
       //square-Player-----------------------------------------------------------------
       var square = {
          x: 285,
@@ -34,11 +39,21 @@
          },
 		 
 		 complete: function(){
-			if(this.x == 0 && this.y == 0){
-				console.log("complete!");
+			if(this.x == slotX && this.y == 0){
+				alert("Level: " + gameLevel + " Complete!");
 				this.x = 285;
 				this.y = 370;
 				ctx.fillRect(this.x, this.y, this.w, this.h);
+				rectangle.createRandomSlotPos();
+				
+				if(gameLevel == 5){
+					stopLoop = true;
+					alert("Game Complete!");
+				}
+				else
+				{
+					gameLevel++;
+				}
 			}
 		 }
        };
@@ -53,9 +68,14 @@
 			ctx.fillStyle = "rgb(0,150,0)";
             ctx.fillRect(this.x, this.y, canvas.width, 30);
 		},
+		
+		createRandomSlotPos: function(){
+			randomX = Math.floor((Math.random() * 114) + 0);
+			slotX = (randomX * 5);
+		},
 		//create a gap of the same size as the player square in the rectangle at the top
 		createSlot: function(){
-			ctx.clearRect(0,0,30,30);
+			ctx.clearRect(slotX, 0, 30, 30);
 		}
 	  }
      
@@ -80,7 +100,7 @@
               this.vx = -this.vx;
           }
 
-          if(this.y > canvas.height - this.r || this.y < this.r){
+          if(this.y > canvas.height - this.r || this.y < 30 + this.r){
               this.vy = -this.vy;
           }
 
@@ -121,17 +141,23 @@
         console.log(event);
         
 		//check that the player square cannot leave the canvas
-        if(event.keyCode == 119 && square.y > 0){//w key -------------------
+        if(event.keyCode == 119 && square.y > 30 || (event.keyCode == 119 && square.y <= 30 && square.x == slotX)){//w key -------------------
 			square.y -= 5;
         }
         else if(event.keyCode == 115 && square.y + 30 < canvas.height){//s key -------------------
 			square.y += 5;
         }
         else if(event.keyCode == 97 && square.x > 0){//a key -------------------
+			if(event.keyCode == 97 && square.y < 30 && square.x == slotX){
+				square.x += 5;
+			}
 			square.x -= 5;
         }
         else if(event.keyCode == 100 && square.x + 30 < canvas.width){//d key -------------------
-            square.x += 5;
+            if(event.keyCode == 100 && square.y < 30 && square.x == slotX){
+				square.x -= 5;
+			}
+			square.x += 5;
         }
       });
   
@@ -141,16 +167,18 @@
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-		for (var i = 0; i < balls.length; i++){
+		for (var i = 0; i < gameLevel; i++){
 		  balls[i].draw();
 		  balls[i].moveBall();
-		  balls[i].colliding(square);
+		  if(balls[i].colliding(square)){
+			stopLoop = true;
+			alert("Game Over!");
+		  }	  
         }
 		
 		//draw the rectangle at the top and clear space for the square
 		rectangle.draw();
 		rectangle.createSlot();
-		
 		
 		square.complete();
 
@@ -158,29 +186,44 @@
 		ctx.fillStyle = "rgb(255,0,0)";
         ctx.fillRect((square.x), (square.y), square.w, square.h);	
         
-        window.requestAnimationFrame(step);
+		if(stopLoop == false){
+			window.requestAnimationFrame(step);
+		}
 	  }
 	  
       //initialyze--------------------------------------------------------------------
 	  function init(){
      	 //draw the rectangle at the top create a slot and draw the player square
 		 rectangle.draw();
+		 rectangle.createRandomSlotPos();
 		 rectangle.createSlot();
+		 
          square.draw();
 		 
 		for(var i = 0; i < 5; i++){
-          balls[i] = new Ball((Math.random() * 300) + 1, (Math.random() * 300) + 1, (Math.random() * 2) + 1, (Math.random() * 3) + 1);
+          balls[i] = new Ball((Math.random() * 500) + 41, (Math.random() * 200) + 41, (Math.random() * 2) + 1, (Math.random() * 3) + 1);
         }
        
-		for (var i = 0; i < balls.length; i++){
+		for (var i = 0; i < gameLevel; i++){
           balls[i].draw();
         }
 		
 		step();
       }
       init(); // call the init function
-       
+      
+	  function restartGame(){
+		stopLoop = false;
+		gameLevel = 1;
+		init();
+		square.x = 285;
+		square.y = 370;
+		square.draw();
+	  }
     </script>
       
+	<div>
+	  <button onclick="restartGame()">Restart</button>
+	</div>
   </body>
 </html>
