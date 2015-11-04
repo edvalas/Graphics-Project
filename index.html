@@ -15,16 +15,16 @@
     <canvas id="canvas" width="600" height="400"></canvas>
     
     <script type="text/javascript">
-      //http://stackoverflow.com/questions/21089959/detecting-collision-of-rectangle-with-circle-in-html5-canvas
       // Gets a handle to the element with id canvasOne. Ian
       var canvas = document.getElementById("canvas");
       // Get a 2D context for the canvas.
       var ctx = canvas.getContext("2d");
      
+	  //some variables used in the game
 	  var gameLevel = 1;
-	  var randomX;
 	  var slotX;
 	  var stopLoop = false;
+	  var balls = [];
 	  
       //square-Player-----------------------------------------------------------------
       var square = {
@@ -32,20 +32,25 @@
          y: 370,
 		 w: 30,
 		 h: 30,
-           
+         
+		 //drawing function
          draw: function(){
             ctx.fillStyle = "rgb(255,0,0)";
             ctx.fillRect(this.x, this.y, this.w, this.h);
          },
 		 
+		 //check if square has filled in the slot thats randomly generated
 		 complete: function(){
 			if(this.x == slotX && this.y == 0){
+				//alert user that level is complete
 				alert("Level: " + gameLevel + " Complete!");
+				//redraw the square at starting position
 				this.x = 285;
 				this.y = 370;
 				ctx.fillRect(this.x, this.y, this.w, this.h);
+				//create a new random slot in the bar
 				rectangle.createRandomSlotPos();
-				
+				//increment game level or if level is 5 stop the game
 				if(gameLevel == 5){
 					stopLoop = true;
 					alert("Game Complete!");
@@ -69,9 +74,10 @@
             ctx.fillRect(this.x, this.y, canvas.width, 30);
 		},
 		
+		//create a random number between 0 and 144(canvas.width/5) for this particular size of canvas and divide by 5 as the player moves by 5 pixels 
+		//so we get a slot where the player square will fit perfectly
 		createRandomSlotPos: function(){
-			randomX = Math.floor((Math.random() * 114) + 0);
-			slotX = (randomX * 5);
+			slotX = Math.floor((Math.random() * 114) + 0) * 5;
 		},
 		//create a gap of the same size as the player square in the rectangle at the top
 		createSlot: function(){
@@ -110,29 +116,36 @@
         };
 		
 		this.colliding = function(square){
-			var distX = Math.abs((this.x + this.vx) - (square.x));
-			var distY = Math.abs((this.y + this.vy) - (square.y));
+			//distance between x,y of circle and center of square
+			var distX = Math.abs((this.x) - (square.x) - (square.w/2));
+			var distY = Math.abs((this.y) - (square.y) - (square.h/2));
 			
-		    if (distX > ((square.w/2) + this.r)){
+			//if distances are more than radius of circle + half width height of square then theyre too far apart for collision
+		    if(distX > ((square.w/2) + this.r)){
 				return false;
 			}
 			if(distY > ((square.h/2) + this.r)){
 				return false;
 			}
-			if (distX <= this.r){
+			//if the distances are less than circles radius then there is a collision check for both x,y
+			if(distX < (this.r)){
 				console.log("collision");
 				this.vx -= this.vx;
 				return true;
 			} 
-			if (distY <= this.r){
+			if(distY < (this.r)){
 				console.log("collision");
 				this.vy -= this.vy;
 				return true;
 			}
+			
+			//corners of the square
+			var cornerX = distX - square.w/2;
+			var cornerY = distY - square.h/2;
+			//maths formula of side a^2 plus side b^2 = longest side^2 if its less than therefore colliding
+			return ((cornerX*cornerX) + (cornerY*cornerY) <= (this.r*this.r));
 		 };
 	  }
-	  
-	  var balls = [];
 	  
 	  //KEYBOARD----------------------------------------------------------------------
       // Add an event listener to the keypress event.
@@ -141,19 +154,25 @@
         console.log(event);
         
 		//check that the player square cannot leave the canvas
+		//check for player collision with top of canvas or check for collision with the bar at the top. So player cant enter the slot is the square isnt in correct position
         if(event.keyCode == 119 && square.y > 30 || (event.keyCode == 119 && square.y <= 30 && square.x == slotX)){//w key -------------------
 			square.y -= 5;
         }
+		//check for bottom of the canvas
         else if(event.keyCode == 115 && square.y + 30 < canvas.height){//s key -------------------
 			square.y += 5;
         }
+		//check left side of the canvas
         else if(event.keyCode == 97 && square.x > 0){//a key -------------------
+			//or left side of the bar when entering the slot
 			if(event.keyCode == 97 && square.y < 30 && square.x == slotX){
 				square.x += 5;
 			}
 			square.x -= 5;
         }
+		//check right side of the canvas 
         else if(event.keyCode == 100 && square.x + 30 < canvas.width){//d key -------------------
+			//or right side of the bar when entering the slot
             if(event.keyCode == 100 && square.y < 30 && square.x == slotX){
 				square.x -= 5;
 			}
@@ -164,9 +183,14 @@
 	  //game loop---------------------------------------------------------------------
 	  function step(t){
         //console.log(t);
-        
+		
+        //clear the canvas for redrawing aslong as the loop is running for requestAnimationFrame
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+		//print the game level on the bottom right
+		ctx.font="20px Georgia";
+		ctx.fillText("Level: " + gameLevel,520,390);
         
+		//loop to print out the number of balls based on game level and check if its colliding with the player square
 		for (var i = 0; i < gameLevel; i++){
 		  balls[i].draw();
 		  balls[i].moveBall();
@@ -180,12 +204,14 @@
 		rectangle.draw();
 		rectangle.createSlot();
 		
+		//check if the bar is complete at the top
 		square.complete();
 
 		//draw the player square
 		ctx.fillStyle = "rgb(255,0,0)";
         ctx.fillRect((square.x), (square.y), square.w, square.h);	
         
+		//continue doing all of the above unless a collision between player and ball occurs or the bar at the top is complete
 		if(stopLoop == false){
 			window.requestAnimationFrame(step);
 		}
@@ -193,26 +219,35 @@
 	  
       //initialyze--------------------------------------------------------------------
 	  function init(){
-     	 //draw the rectangle at the top create a slot and draw the player square
+     	 //draw the rectangle at the top create a slot and clear the space for it and draw the player square
 		 rectangle.draw();
 		 rectangle.createRandomSlotPos();
 		 rectangle.createSlot();
 		 
          square.draw();
 		 
+		//loop to generate 5 balls in an array with random x,y values and random x,y velocities between, the balls x,y are in the top half of the canvas + 41
+		//so they will not generate inside the bar at the top
 		for(var i = 0; i < 5; i++){
           balls[i] = new Ball((Math.random() * 500) + 41, (Math.random() * 200) + 41, (Math.random() * 2) + 1, (Math.random() * 3) + 1);
         }
        
+		//loop to draw the balls based on the game level although there are 5 balls in the array only 1 is drawn at the start
 		for (var i = 0; i < gameLevel; i++){
           balls[i].draw();
         }
-		
+		//print the game level on screen
+		ctx.font="20px Georgia";
+		ctx.fillText("Level: " + gameLevel,520,390);
+		//call the step function
 		step();
       }
       init(); // call the init function
       
+	  //function to reset the game
+	  //if used before the game is complete or over due to a collision it speeds ups the balls velocity each time you use the button otherwise works fine
 	  function restartGame(){
+		//reset all variables and square to original starting positions and draw the player square
 		stopLoop = false;
 		gameLevel = 1;
 		init();
@@ -221,7 +256,8 @@
 		square.draw();
 	  }
     </script>
-      
+    
+	<!-- A div and a button inside to call the restart function-->
 	<div>
 	  <button onclick="restartGame()">Restart</button>
 	</div>
