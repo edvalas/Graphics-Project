@@ -9,6 +9,13 @@
 - Bar to be filled at the top
 - Random balls(An array of 5 balls, there is one ball added per level starting with 1 and all balls each level get new coordinates and velocities)
 
+####Files in Directory
+
+- Read me
+- Index.html
+
+Everything is in index.html
+
 ####How to play
 
 - Player is the square which starts out at the bottom of the screen
@@ -21,4 +28,4 @@
 
 ####Summary
 
-The game is easy to play and understand and is fun, there are some minor bugs that occur sometimes. I spent most of the time trying to get the collisions to look as smooth as possible. The collision between the balls sometimes is not correct but very rarely. The collision between the player and the balls is sometimes perfect and sometimes a few pixels off.
+The game is easy to play and understand, there are some minor bugs that occur sometimes. I spent most of the time trying to get the collisions to look as smooth as possible. The collision between the balls sometimes is not correct but very rarely. The collision between the player and the balls is sometimes perfect and sometimes a few pixels off. Overall the game works fine and is fun to play and can be quite challenging requiring quick reactions.
