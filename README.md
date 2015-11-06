@@ -21,4 +21,4 @@
 
 ####Summary
 
-The game is easy to play and understand , there are some minor bugs that occur sometimes. The collision between the balls sometimes is not correct but very rarely. The collision between the player and the balls is sometimes perfect and sometimes a few pixels off.
+The game is easy to play and understand and is fun, there are some minor bugs that occur sometimes. I spent most of the time trying to get the collisions to look as smooth as possible. The collision between the balls sometimes is not correct but very rarely. The collision between the player and the balls is sometimes perfect and sometimes a few pixels off.
