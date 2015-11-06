@@ -3,4 +3,8 @@
 
 ### This is the README for my Graphics project, which includes details about the game.
 
-asdasdsad
+####Elements of the game:
+
+- Player(square)
+- Bar to be filled at the top
+- Random balls
