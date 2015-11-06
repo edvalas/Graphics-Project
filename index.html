@@ -25,6 +25,7 @@
 	  var slotX;
 	  var stopLoop = false;
 	  var balls = [];
+	  var initialize = 0;
 	  
       //square-Player-----------------------------------------------------------------
       var square = {
@@ -57,6 +58,8 @@
 				}
 				else
 				{
+					//increment the level and reset initialize for redrawing off balls
+					initialize = 0;
 					gameLevel++;
 				}
 			}
@@ -92,7 +95,8 @@
 		this.r = 10;
 		this.vx = vx;
 		this.vy = vy;
-        
+		
+        //draw the ball function
         this.draw = function(){
           ctx.fillStyle = "rgb(200,10,500)";
           ctx.beginPath();
@@ -101,6 +105,7 @@
           ctx.closePath();
         };
         
+		//ball move and collision with canvas, if collision reverse velocity
         this.moveBall = function(){
           if(this.x > canvas.width - this.r || this.x < this.r){
               this.vx = -this.vx;
@@ -110,12 +115,14 @@
               this.vy = -this.vy;
           }
 
-          // Update the y location.
+		  // Update the x location
+          // Update the y location
           this.x += this.vx;
           this.y += this.vy;
         };
 		
 		this.colliding = function(square){
+		
 			//distance between x,y of circle and center of square
 			var distX = Math.abs((this.x) - (square.x) - (square.w/2));
 			var distY = Math.abs((this.y) - (square.y) - (square.h/2));
@@ -151,7 +158,7 @@
       // Add an event listener to the keypress event.
       window.addEventListener("keypress", function(event) { 
         // Just log the event to the console.
-        console.log(event);
+        //console.log(event);
         
 		//check that the player square cannot leave the canvas
 		//check for player collision with top of canvas or check for collision with the bar at the top. So player cant enter the slot is the square isnt in correct position
@@ -189,6 +196,16 @@
 		//print the game level on the bottom right
 		ctx.font="20px Georgia";
 		ctx.fillText("Level: " + gameLevel,520,390);
+
+		//loop to generate balls in an array with random x,y values and random x,y velocities between, the balls x,y are in the top half of the canvas + 41
+		//so they will not generate inside the bar at the top
+		if (initialize == 0){
+			//each level create an array with random values for x,y of position and velocity based on game level
+	       	for(var i = 0; i < gameLevel; i++){
+	          balls[i] = new Ball((Math.random() * 500) + 41, (Math.random() * 200) + 41, (Math.random() * 2) + 1, (Math.random() * 3) + 1);
+	        }
+	        initialize = 1;
+    	}
         
 		//loop to print out the number of balls based on game level and check if its colliding with the player square
 		for (var i = 0; i < gameLevel; i++){
@@ -196,9 +213,116 @@
 		  balls[i].moveBall();
 		  if(balls[i].colliding(square)){
 			stopLoop = true;
+			initialize = 0;
 			alert("Game Over!");
-		  }	  
+		  }
         }
+		
+		//for loop to check balls colliding with each other
+		for(i=0; i < balls.length;i++){
+			for(j = i +1; j < balls.length; j++){
+				//dx distance between the 2 x values of 2 balls
+				var dx = Math.abs((balls[i].x + balls[i].r) - (balls[j].x + balls[j].r));
+				//dy distance between the 2 y values of 2 balls
+				var dy = Math.abs((balls[i].y  + balls[i].r) - (balls[j].y  + balls[j].r));
+				//sum math forluma for distance between 2 points
+				var sum = Math.sqrt((dx*dx) + (dy*dy));
+				
+				//if sum is less than the radii of 2 balls then theyre colliding
+				if(sum < (balls[i].r + balls[j].r))
+				{   console.log("coliision");
+					//check here the horizontal collision between balls
+					if(balls[i].x == balls[j].x){
+						balls[i].vx = -balls[i].vx;
+						balls[j].vx = -balls[j].vx;
+					}
+					//check the vertical collision between balls
+					if(balls[i].y == balls[j].y){
+						balls[i].vy = -balls[i].vy;
+						balls[j].vy = -balls[j].vy;
+					}
+					//bottom right
+					if(balls[i].x < balls[j].x && balls[i].y < balls[j].y){
+						// calculate distance between the two x's and y's
+						var distX = balls[j].x - balls[i].x;
+						var distY = balls[j].y - balls[i].y;
+						
+						// if distance x is greater than y only reverse x velocity
+						if (distX > distY)
+						{
+							balls[i].vx = -balls[i].vx;
+							balls[j].vx = -balls[j].vx;
+						}
+						// else if distance y is greater only reverse y velocity
+						else if (distY > distX)
+						{
+							balls[i].vy = -balls[i].vy;
+							balls[j].vy = -balls[j].vy;
+						}
+						
+					}
+					//bottom left
+					if(balls[i].x > balls[j].x && balls[i].y < balls[j].y){ 
+						// calculate distance between the two x's and y's
+						var distX = balls[i].x - balls[j].x;
+						var distY = balls[j].y - balls[i].y;
+
+						// if distance x is greater than y only reverse x velocity
+						if (distX > distY)
+						{
+							balls[i].vx = -balls[i].vx;
+							balls[j].vx = -balls[j].vx;
+						}
+						// else if distance y is greater only reverse y velocity
+						else if (distY > distX)
+						{
+							balls[i].vy = -balls[i].vy;
+							balls[j].vy = -balls[j].vy;
+						}
+					}
+					//top right
+					if(balls[i].x < balls[j].x && balls[i].y > balls[j].y){ 
+						// calculate distance between the two x's and y's
+						var distX = balls[j].x - balls[i].x;
+						var distY = balls[i].y - balls[j].y;
+
+						// if distance x is greater than y only reverse x velocity
+						if (distX > distY)
+						{
+							balls[i].vx = -balls[i].vx;
+							balls[j].vx = -balls[j].vx;
+						}
+						// else if distance y is greater only reverse y velocity
+						else if (distY > distX)
+						{
+							balls[i].vy = -balls[i].vy;
+							balls[j].vy = -balls[j].vy;
+						}
+					}
+					//top left
+					if(balls[i].x > balls[j].x && balls[i].y > balls[j].y){ 
+						// calculate distance between the two x's and y's
+						var distX = balls[i].x - balls[j].x;
+						var distY = balls[i].y - balls[j].y;
+
+						// if distance x is greater than y only reverse x velocity
+						if (distX > distY)
+						{
+							balls[i].vx = -balls[i].vx;
+							balls[j].vx = -balls[j].vx;
+						}
+						// else if distance y is greater only reverse y velocity
+						else if (distY > distX)
+						{
+							balls[i].vy = -balls[i].vy;
+							balls[j].vy = -balls[j].vy;
+						}
+					}
+					
+				}
+			}	
+		 
+		}//long loop-------------------------------------------------------------
 		
 		//draw the rectangle at the top and clear space for the square
 		rectangle.draw();
@@ -217,39 +341,31 @@
 		}
 	  }
 	  
-      //initialyze--------------------------------------------------------------------
+      //initialize--------------------------------------------------------------------
 	  function init(){
      	 //draw the rectangle at the top create a slot and clear the space for it and draw the player square
+     	 ctx.clearRect(0,0,canvas.width,canvas.height);
 		 rectangle.draw();
 		 rectangle.createRandomSlotPos();
 		 rectangle.createSlot();
 		 
          square.draw();
 		 
-		//loop to generate 5 balls in an array with random x,y values and random x,y velocities between, the balls x,y are in the top half of the canvas + 41
-		//so they will not generate inside the bar at the top
-		for(var i = 0; i < 5; i++){
-          balls[i] = new Ball((Math.random() * 500) + 41, (Math.random() * 200) + 41, (Math.random() * 2) + 1, (Math.random() * 3) + 1);
-        }
-       
-		//loop to draw the balls based on the game level although there are 5 balls in the array only 1 is drawn at the start
-		for (var i = 0; i < gameLevel; i++){
-          balls[i].draw();
-        }
 		//print the game level on screen
 		ctx.font="20px Georgia";
 		ctx.fillText("Level: " + gameLevel,520,390);
 		//call the step function
 		step();
       }
-      init(); // call the init function
+
+      init(); // call the init function to initialize and draw objects
       
 	  //function to reset the game
-	  //if used before the game is complete or over due to a collision it speeds ups the balls velocity each time you use the button otherwise works fine
 	  function restartGame(){
 		//reset all variables and square to original starting positions and draw the player square
 		stopLoop = false;
 		gameLevel = 1;
+		initialize = 0;
 		init();
 		square.x = 285;
 		square.y = 370;
