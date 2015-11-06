@@ -7,7 +7,7 @@
 
 - Player(square)
 - Bar to be filled at the top
-- Random balls
+- Random balls(An array of 5 balls, there is one ball added per level starting with 1 and all balls each level get new coordinates and velocities)
 
 ####How to play
 
