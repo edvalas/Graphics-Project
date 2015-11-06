@@ -15,5 +15,5 @@
 - The player moves the square with w,a,s,d keys
 - The objective of the game is to move the square to the top of the screen and fill in the gap to complete the bar
 - There are 5 levels
-- Each level there is one ball moving around the screen and if the player collides with the ball the game is over
+- Each level there is one ball or balls moving around the screen and if the player collides with the ball the game is over
 - Each level another ball is added
