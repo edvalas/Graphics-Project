@@ -18,3 +18,7 @@
 - Each level there is one ball or balls moving around the screen and if the player collides with the ball the game is over
 - Each level another ball is added
 - There is a restart button to reset the game if you completed the game or have collided with a ball
+
+####Summary:
+
+The game is easy to play and understand , there are some minor bugs that occur sometimes. The collision between the balls sometimes is not correct but very rarely. The collision between the player and the balls is sometimes perfect and sometimes a few pixels off.
