@@ -17,3 +17,4 @@
 - There are 5 levels
 - Each level there is one ball or balls moving around the screen and if the player collides with the ball the game is over
 - Each level another ball is added
+- There is a restart button to reset the game if you completed the game or have collided with a ball
